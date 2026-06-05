@@ -304,8 +304,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ html, sourcesHtml, emailOutro, research });
   } catch (err) {
     console.error("Generate error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    const friendlyError = msg.includes("credit balance is too low")
+      ? "Your Anthropic API credits are too low. Add credits at console.anthropic.com → Plans & Billing."
+      : msg.includes("401") || msg.includes("authentication")
+      ? "Invalid API key. Check ANTHROPIC_API_KEY in your .env.local file."
+      : "Failed to generate flyer. Check your API key and try again.";
     return NextResponse.json(
-      { error: "Failed to generate flyer. Check your API key and try again." },
+      { error: friendlyError },
       { status: 500 }
     );
   }
