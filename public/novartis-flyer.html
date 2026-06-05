@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Retirement Planning Overview – Novartis</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fa;
+    color: #1a2e4a;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .page {
+    width: 850px;
+    min-height: 1100px;
+    margin: 0 auto;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: #1a2e4a;
+    color: #fff;
+    padding: 28px 36px 22px;
+  }
+  .header-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #c9a84c;
+    margin-bottom: 6px;
+    font-family: Arial, sans-serif;
+  }
+  .header h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 26px;
+    font-weight: normal;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .header h1 span { color: #c9a84c; }
+  .header-sub {
+    font-size: 12px;
+    color: #a8bdd0;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    margin-top: 12px;
+    padding-top: 10px;
+  }
+  .header-sub strong { color: #fff; }
+
+  /* ── Body ── */
+  .body {
+    flex: 1;
+    padding: 24px 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .section {
+    background: #f5f7fa;
+    border-left: 3px solid #c9a84c;
+    padding: 14px 16px;
+    border-radius: 0 6px 6px 0;
+  }
+  .section.full { grid-column: 1 / -1; }
+  .section.accent { background: #1a2e4a; border-left-color: #c9a84c; color: #fff; }
+  .section.accent .section-title { color: #c9a84c; }
+  .section.accent li { color: #d4e3f0; }
+  .section.accent p { color: #d4e3f0; }
+
+  .section-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13px;
+    font-weight: bold;
+    color: #1a2e4a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+  }
+
+  ul {
+    padding-left: 16px;
+  }
+  li {
+    margin-bottom: 5px;
+    color: #2d4a6a;
+    font-size: 12.5px;
+  }
+  li strong { color: #1a2e4a; }
+
+  p.note {
+    font-size: 11.5px;
+    color: #6b8099;
+    font-style: italic;
+    margin-top: 8px;
+  }
+
+  /* ── Plans grid ── */
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 2px;
+  }
+  .plan-card {
+    background: #fff;
+    border: 1px solid #d8e4ed;
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .plan-card .plan-icon {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  .plan-card .plan-name {
+    font-family: Georgia, serif;
+    font-size: 12.5px;
+    font-weight: bold;
+    color: #1a2e4a;
+    margin-bottom: 3px;
+  }
+  .plan-card .plan-desc {
+    font-size: 11px;
+    color: #5a7a99;
+    line-height: 1.4;
+  }
+
+  /* ── Key Concepts ── */
+  .concepts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 2px;
+  }
+  .concept {
+    background: #fff;
+    border-radius: 6px;
+    padding: 10px 12px;
+    border-top: 2px solid #c9a84c;
+  }
+  .concept .concept-title {
+    font-size: 11.5px;
+    font-weight: bold;
+    color: #1a2e4a;
+    margin-bottom: 4px;
+  }
+  .concept p {
+    font-size: 11px;
+    color: #4a6a88;
+    line-height: 1.45;
+  }
+
+  /* ── Questions ── */
+  .questions-list {
+    columns: 2;
+    column-gap: 20px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .questions-list li {
+    break-inside: avoid;
+    padding: 6px 8px 6px 26px;
+    margin-bottom: 6px;
+    background: #fff;
+    border-radius: 4px;
+    position: relative;
+    font-size: 12px;
+    color: #2d4a6a;
+    border: 1px solid #e2eaf2;
+  }
+  .questions-list li::before {
+    content: "?";
+    position: absolute;
+    left: 8px;
+    top: 6px;
+    width: 14px;
+    height: 14px;
+    background: #c9a84c;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 9px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 14px;
+    text-align: center;
+  }
+
+  /* ── Next Steps ── */
+  .steps-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 2px;
+  }
+  .step {
+    text-align: center;
+    padding: 10px 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    border: 1px solid rgba(201,168,76,0.3);
+  }
+  .step-num {
+    width: 24px;
+    height: 24px;
+    background: #c9a84c;
+    color: #1a2e4a;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 6px;
+  }
+  .step p {
+    font-size: 11px;
+    color: #a8bdd0;
+    line-height: 1.4;
+  }
+  .step p strong { color: #fff; }
+
+  /* ── Footer ── */
+  .footer {
+    background: #f5f7fa;
+    border-top: 1px solid #d0dde9;
+    padding: 12px 36px;
+    font-size: 10px;
+    color: #7a96ad;
+    line-height: 1.5;
+  }
+  .footer strong { color: #1a2e4a; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ══ HEADER ══ -->
+  <div class="header">
+    <div class="header-tag">Employee Benefits Education Series</div>
+    <h1>Retirement Planning Overview:<br><span>Novartis</span></h1>
+    <div class="header-sub">
+      <strong>For employees ages 50–65 nearing retirement.</strong>
+      This guide summarizes key retirement benefits and planning considerations — so you can make informed decisions about your financial future.
+    </div>
+  </div>
+
+  <!-- ══ BODY GRID ══ -->
+  <div class="body">
+
+    <!-- Section 1: What You Have Available -->
+    <div class="section full">
+      <div class="section-title">What You Have Available</div>
+      <div class="plans-grid">
+        <div class="plan-card">
+          <div class="plan-icon">💼</div>
+          <div class="plan-name">401(k) Savings Plan</div>
+          <div class="plan-desc">Tax-advantaged contributions with employer matching. Pre-tax and Roth (after-tax) options available.</div>
+        </div>
+        <div class="plan-card">
+          <div class="plan-icon">🏛️</div>
+          <div class="plan-name">Pension / Cash Balance Plan</div>
+          <div class="plan-desc">Company-funded retirement account. Your balance grows with annual pay credits and interest credits.</div>
+        </div>
+        <div class="plan-card">
+          <div class="plan-icon">📈</div>
+          <div class="plan-name">Employee Stock Purchase Plan (ESPP)</div>
+          <div class="plan-desc">Purchase Novartis shares at a discount. Shares may be held or sold — consider diversification timing.</div>
+        </div>
+      </div>
+      <p class="note">Plan availability may vary. Refer to your Novartis Benefits Portal or HR for current plan details specific to your role and location.</p>
+    </div>
+
+    <!-- Section 2: How the Plan Works -->
+    <div class="section">
+      <div class="section-title">How the 401(k) Plan Works</div>
+      <ul>
+        <li><strong>Your Contributions:</strong> You elect a percentage of your salary — up to IRS limits ($23,500 in 2025; $31,000 if age 50+).</li>
+        <li><strong>Employer Match (Illustrative):</strong> Novartis has historically provided a generous match — commonly structured as 100% on the first 5% of eligible pay. <em>Verify your current match in the Benefits Portal.</em></li>
+        <li><strong>Vesting Schedule:</strong> Company matching contributions typically vest on a graded schedule (e.g., 20% per year over 5 years). If you have 5+ years of service, you are likely fully vested.</li>
+        <li><strong>Catch-Up Contributions:</strong> If you are age 50 or older, you can contribute an additional $7,500 per year (2025 limit) — a significant opportunity to accelerate savings.</li>
+        <li><strong>Investment Options:</strong> Choose from a range of mutual funds, index funds, and target-date funds designed for specific retirement years.</li>
+      </ul>
+    </div>
+
+    <!-- Section 3: Cash Balance Pension -->
+    <div class="section">
+      <div class="section-title">Cash Balance Pension Highlights</div>
+      <ul>
+        <li><strong>Annual Pay Credits:</strong> Each year, Novartis credits a percentage of your eligible pay into your cash balance account.</li>
+        <li><strong>Interest Credits:</strong> Your balance earns guaranteed interest credits annually, regardless of market performance.</li>
+        <li><strong>Payout Options:</strong> At retirement, you may typically choose a lump sum or annuity (monthly income for life). Evaluate both options carefully.</li>
+        <li><strong>Fully Vested:</strong> Most employees become fully vested in the pension after 3 years of service.</li>
+        <li><strong>Pension + 401(k):</strong> Having both a defined-benefit pension and a defined-contribution 401(k) is a significant advantage — they provide complementary income streams in retirement.</li>
+      </ul>
+      <p class="note">Pension terms may vary by hire date and employment category. Review your Pension Statement for your personal projected benefit.</p>
+    </div>
+
+    <!-- Section 4: Key Retirement Concepts -->
+    <div class="section full">
+      <div class="section-title">Key Retirement Planning Concepts</div>
+      <div class="concepts-row">
+        <div class="concept">
+          <div class="concept-title">Diversification</div>
+          <p>Don't concentrate too heavily in any single investment — including Novartis stock. As you approach retirement, consider gradually shifting toward lower-volatility holdings (bonds, stable-value funds) to protect your accumulated savings.</p>
+        </div>
+        <div class="concept">
+          <div class="concept-title">Pre-Tax vs. Roth 401(k)</div>
+          <p><strong>Pre-tax:</strong> Contributions reduce today's taxable income; withdrawals are taxed in retirement.<br><strong>Roth:</strong> No upfront tax break; qualified withdrawals in retirement are tax-free. Consider your expected tax rate in retirement when choosing.</p>
+        </div>
+        <div class="concept">
+          <div class="concept-title">Retirement Income Planning</div>
+          <p>Think in terms of income sources: Pension + 401(k) + Social Security + personal savings. Map out when each source turns on, how much it provides, and how long it needs to last. A common guideline: plan for 25–30 years of retirement income.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Questions to Ask -->
+    <div class="section full">
+      <div class="section-title">Questions to Ask Before You Retire</div>
+      <ul class="questions-list">
+        <li>Am I maximizing my 401(k) contributions — including catch-up contributions if I'm 50 or older?</li>
+        <li>Is the employer match fully vested — and am I leaving any match on the table?</li>
+        <li>What is my estimated monthly pension benefit, and should I take a lump sum or annuity?</li>
+        <li>When should I claim Social Security — at 62, 67, or 70 — to maximize my lifetime benefit?</li>
+        <li>What is my target retirement date, and do I have at least 12–18 months to prepare?</li>
+        <li>Have I updated my 401(k) investment allocation as I get closer to retirement?</li>
+        <li>How much Novartis stock do I hold (ESPP or otherwise) — and is it appropriately diversified?</li>
+        <li>What are my healthcare coverage options between retirement and Medicare eligibility at 65?</li>
+      </ul>
+    </div>
+
+    <!-- Section 6: Next Steps -->
+    <div class="section accent full">
+      <div class="section-title">Next Steps for Retirement Readiness</div>
+      <div class="steps-row">
+        <div class="step">
+          <div class="step-num">1</div>
+          <p><strong>Log in to the Novartis Benefits Portal</strong> to review your current balances, vesting status, and pension estimate.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <p><strong>Request your Social Security Statement</strong> at ssa.gov/myaccount to understand your projected benefit.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <p><strong>Review your investment allocation</strong> and consider whether it aligns with your timeline to retirement.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <p><strong>Consult a licensed financial advisor</strong> to build a personalized retirement income strategy before you retire.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- ══ FOOTER ══ -->
+  <div class="footer">
+    <strong>Disclaimer:</strong> This material is for educational purposes only and is not affiliated with or endorsed by Novartis. It does not constitute investment, tax, or legal advice. Plan details, match rates, and vesting schedules are based on publicly available information and illustrative examples — please verify all details through your official Novartis Benefits Portal or HR department. Contribution limits are 2025 IRS figures. Consult a qualified financial professional before making retirement decisions.
+  </div>
+
+</div><!-- /page -->
+</body>
+</html>
