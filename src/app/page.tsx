@@ -94,8 +94,10 @@ export default function Home() {
       const a = document.createElement("a");
       a.href = url;
       a.download = `${filename}.pdf`;
+      document.body.appendChild(a);
       a.click();
-      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
       alert(err instanceof Error ? err.message : "PDF failed");
     } finally {
