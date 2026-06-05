@@ -32,6 +32,7 @@ const LOADING_STEPS: Record<"company" | "general", string[]> = {
 };
 
 type Tab = "flyer" | "sources";
+type DownloadFormat = "pdf" | "png";
 
 export default function Home() {
   const [form, setForm] = useState<FlyerInputs>(EMPTY_COMPANY_FORM);
@@ -42,7 +43,7 @@ export default function Home() {
   const [sourcesHtml, setSourcesHtml] = useState<string | null>(null);
   const [emailOutro, setEmailOutro] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("flyer");
-  const [pdfLoading, setPdfLoading] = useState<Tab | null>(null);
+  const [dlLoading, setDlLoading] = useState<`${Tab}-${DownloadFormat}` | null>(null);
   const [copied, setCopied] = useState(false);
   const stepTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -110,35 +111,33 @@ export default function Home() {
     }
   }
 
-  async function handleDownloadPdf(type: Tab) {
-    const html = type === "flyer" ? flyerHtml : sourcesHtml;
+  async function handleDownload(tab: Tab, format: DownloadFormat) {
+    const html = tab === "flyer" ? flyerHtml : sourcesHtml;
     if (!html) return;
-    setPdfLoading(type);
+    const key: `${Tab}-${DownloadFormat}` = `${tab}-${format}`;
+    setDlLoading(key);
     try {
-      const companySlug = form.companyName.replace(/\s+/g, "-") || "401k";
-      const filename =
-        type === "flyer"
-          ? `${companySlug}-retirement-flyer`
-          : `${companySlug}-sources-references`;
+      const companySlug = (form.companyName || "401k").replace(/\s+/g, "-");
+      const base = tab === "flyer" ? `${companySlug}-retirement-flyer` : `${companySlug}-sources`;
       const res = await fetch("/api/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html, filename }),
+        body: JSON.stringify({ html, filename: base, format }),
       });
-      if (!res.ok) throw new Error("PDF generation failed");
+      if (!res.ok) throw new Error(`${format.toUpperCase()} generation failed`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${filename}.pdf`;
+      a.download = `${base}.${format}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "PDF failed");
+      alert(err instanceof Error ? err.message : "Download failed");
     } finally {
-      setPdfLoading(null);
+      setDlLoading(null);
     }
   }
 
@@ -394,25 +393,32 @@ export default function Home() {
                       className="px-3 py-1.5 text-xs font-medium bg-white border border-slate-300 rounded-lg hover:border-[#1a2e4a] transition-colors cursor-pointer">
                       Print
                     </button>
-                    <button
-                      onClick={() => handleDownloadPdf(activeTab)}
-                      disabled={pdfLoading === activeTab}
-                      className="px-3 py-1.5 text-xs font-medium bg-[#1a2e4a] text-white border border-[#1a2e4a] rounded-lg hover:bg-[#243d61] disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer flex items-center gap-1.5"
-                    >
-                      {pdfLoading === activeTab ? (
-                        <>
-                          <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          Generating PDF…
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                          Download PDF
-                        </>
-                      )}
-                    </button>
+                    {(["pdf", "png"] as DownloadFormat[]).map((fmt) => {
+                      const key: `${Tab}-${DownloadFormat}` = `${activeTab}-${fmt}`;
+                      const busy = dlLoading === key;
+                      return (
+                        <button
+                          key={fmt}
+                          onClick={() => handleDownload(activeTab, fmt)}
+                          disabled={busy}
+                          className="px-3 py-1.5 text-xs font-medium bg-[#1a2e4a] text-white border border-[#1a2e4a] rounded-lg hover:bg-[#243d61] disabled:opacity-60 disabled:cursor-not-allowed transition-colors cursor-pointer flex items-center gap-1.5"
+                        >
+                          {busy ? (
+                            <>
+                              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              {fmt === "pdf" ? "PDF…" : "Image…"}
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                              </svg>
+                              {fmt === "pdf" ? "PDF" : "Image"}
+                            </>
+                          )}
+                        </button>
+                      );
+                    })}
                   </>
                 )}
               </div>
