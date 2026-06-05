@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react"; // useRef kept for step timer
 import type { FlyerInputs } from "./api/generate/route";
 
 const PLAN_OPTIONS = [
@@ -27,16 +27,8 @@ const EMPTY_COMPANY_FORM: FlyerInputs = {
 };
 
 const LOADING_STEPS: Record<"company" | "general", string[]> = {
-  company: [
-    "Searching the web for benefit details…",
-    "Reading official benefits pages…",
-    "Analyzing retirement plan data…",
-    "Writing your custom flyer…",
-  ],
-  general: [
-    "Writing general 401(k) flyer…",
-    "Adding key planning concepts…",
-  ],
+  company: ["Writing your flyer…", "Almost done…"],
+  general: ["Writing general 401(k) flyer…", "Almost done…"],
 };
 
 type Tab = "flyer" | "sources";
@@ -246,16 +238,6 @@ export default function Home() {
           ) : (
             /* Company-specific mode */
             <form onSubmit={handleGenerate} className="flex flex-col gap-5" id="company-form">
-              {/* Research notice */}
-              <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5">
-                <svg className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <p className="text-xs text-blue-700 leading-relaxed">
-                  Claude will search the company&apos;s website for real benefit details before writing the flyer. Fill in anything you already know to supplement the research.
-                </p>
-              </div>
-
               {/* Company name */}
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-slate-700">
@@ -370,7 +352,7 @@ export default function Home() {
             ) : form.mode === "general" ? (
               "Generate General 401(k) Flyer"
             ) : (
-              "Research & Generate Flyer"
+              "Generate Flyer"
             )}
           </button>
         </div>
@@ -487,7 +469,7 @@ export default function Home() {
                   </div>
                   <p className="text-slate-500 text-sm max-w-xs">
                     {form.mode === "company"
-                      ? "Enter a company name and click Research & Generate. Claude will search their website for real benefit details."
+                      ? "Enter a company name and click Generate Flyer. Add any known details to override Claude's defaults."
                       : "Click Generate to produce a general 401(k) educational flyer — no company needed."}
                   </p>
                 </>

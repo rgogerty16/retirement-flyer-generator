@@ -46,79 +46,33 @@ TONE: Educational, professional, neutral. No solicitation. No performance claims
 
 Return ONLY the raw HTML — no markdown fences, no explanation.`;
 
-// ─── Research ─────────────────────────────────────────────────────────────────
-
-async function researchCompanyBenefits(companyName: string): Promise<string> {
-  const prompt = `Research the employee retirement benefits offered by "${companyName}".
-
-Use web search and web fetch to find their official information. Try:
-1. Search: "${companyName} 401k match vesting retirement benefits"
-2. Search: "${companyName} employee benefits retirement plan site:${companyName.toLowerCase().replace(/\s+/g, "")}.com OR site:${companyName.toLowerCase().replace(/\s+/g, "-")}.com"
-3. Fetch their careers or benefits page if found
-4. Search: "${companyName} proxy statement pension ESPP"
-
-Collect and return a concise structured summary covering:
-- 401(k) match rate and structure (exact % if found)
-- Vesting schedule
-- Pension or cash balance plan details
-- ESPP (Employee Stock Purchase Plan) details
-- Profit sharing or other retirement benefits
-- Retirement eligibility age / service requirements
-- Any other notable retirement or financial benefits
-
-Be specific about numbers when found. Clearly note which facts came from official sources vs. are unavailable publicly. Do not invent numbers.`;
-
-  let messages: Anthropic.MessageParam[] = [{ role: "user", content: prompt }];
-
-  // Loop to handle pause_turn (server-side tool iteration limit)
-  for (let i = 0; i < 5; i++) {
-    const response = await client.messages.create({
-      model: "claude-opus-4-8",
-      max_tokens: 3000,
-      tools: [
-        { type: "web_search_20260209", name: "web_search" },
-        { type: "web_fetch_20260209", name: "web_fetch" },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any,
-      messages,
-    });
-
-    if (response.stop_reason !== "pause_turn") {
-      return response.content
-        .filter((b): b is Anthropic.TextBlock => b.type === "text")
-        .map((b) => b.text)
-        .join("\n")
-        .trim() || "No public benefit details found.";
-    }
-
-    messages = [...messages, { role: "assistant", content: response.content }];
-  }
-
-  return "Research timed out — use general industry knowledge for this company.";
-}
-
 // ─── Prompts ──────────────────────────────────────────────────────────────────
 
-function buildFlyerPrompt(inputs: FlyerInputs, research: string): string {
+function buildFlyerPrompt(inputs: FlyerInputs): string {
   if (inputs.mode === "general") {
-    return `Create a one-page general 401(k) educational flyer for employees aged 50–65 who are approaching retirement.
+    return `Create a one-page general 401(k) educational flyer for employees aged 50–65 approaching retirement.
 
 This is a GENERAL flyer — not tied to any specific employer. Cover:
 1. Header: "Understanding Your 401(k): A Retirement Planning Snapshot"
 2. "What Is a 401(k)?" — brief explanation, pre-tax vs Roth
-3. "Employer Match: Free Money" — explain the concept, illustrative example (100% on first 5%)
-4. "Contribution Limits (2025)" — $23,500 base, $31,000 catch-up age 50+
-5. "Vesting: When It's Truly Yours" — cliff vs graded, why it matters
-6. "Key Planning Concepts" — diversification, target-date funds, income planning
-7. "Questions to Ask Your Plan Administrator" — 5 sharp questions
+3. "Employer Match: Free Money" — explain the concept with an illustrative example (e.g. 100% on first 5%)
+4. "2025 Contribution Limits" — $23,500 base, $31,000 if age 50+ (catch-up)
+5. "Vesting: When It's Truly Yours" — cliff vs graded, why it matters near retirement
+6. "Key Planning Concepts" — diversification, target-date funds, income planning horizon
+7. "Questions to Ask Your Plan Administrator" — 5 sharp, practical questions
 8. Footer disclaimer: "This material is for general educational purposes only and does not constitute investment, tax, or legal advice."
 
-Use 2025 IRS figures. Label all examples as illustrative.`;
+Use 2025 IRS figures. Label all match/vesting examples as illustrative.
+
+After the flyer, output ---SOURCES_JSON--- then a JSON array of source objects with fields: category, claim, source_name, description.`;
   }
 
-  const userInputSections = [
-    inputs.retirementPlans.length > 0 &&
-      `Plans offered: ${inputs.retirementPlans.join(", ")}`,
+  const plansStr =
+    inputs.retirementPlans.length > 0
+      ? inputs.retirementPlans.join(", ")
+      : "Not specified — use your best knowledge of this company's typical offerings";
+
+  const overrides = [
     inputs.matchingStructure && `Match structure: ${inputs.matchingStructure}`,
     inputs.vestingSchedule && `Vesting: ${inputs.vestingSchedule}`,
     inputs.investmentOptions && `Investment options: ${inputs.investmentOptions}`,
@@ -130,24 +84,20 @@ Use 2025 IRS figures. Label all examples as illustrative.`;
 
   return `Create a one-page retirement plan educational flyer for employees aged 50–65 at ${inputs.companyName}.
 
-RESEARCHED COMPANY DATA (use this — it came from their official website):
-${research}
+KNOWN DETAILS (provided by user — use these exactly):
+- Plans offered: ${plansStr}
+${overrides || "- No additional details provided"}
 
-USER-PROVIDED DETAILS (override research where more specific):
-${userInputSections || "None provided — rely on research above."}
+INSTRUCTIONS:
+Use your knowledge of ${inputs.companyName}'s publicly known retirement benefits to fill in any gaps. If you are confident a detail is publicly known and accurate (e.g. from SEC filings, official press, or well-documented HR policies), include it as a fact. If a figure is uncertain or unavailable, use a clearly labeled "illustrative example" with a realistic industry benchmark.
 
 REQUIRED SECTIONS:
 1. Header: "Retirement Planning Overview: ${inputs.companyName}"
 2. "What's Available to You" — plans offered, concise
-3. "How Your Plans Work" — match, vesting, contributions (use real numbers from research; label as "illustrative" only if not confirmed)
+3. "How Your Plans Work" — match, vesting, contributions
 4. "Key Retirement Concepts" — diversification, tax treatment, income planning
-5. "Questions to Ask Before You Retire" — 5–6 targeted questions
+5. "Questions to Ask Before You Retire" — 5–6 targeted, specific questions
 6. Footer: "This material is for educational purposes only and is not affiliated with or endorsed by ${inputs.companyName}. It does not constitute investment, tax, or legal advice."
-
-ACCURACY RULES:
-- Use confirmed numbers from the research; label unconfirmed figures "illustrative example"
-- Do not invent specific dollar amounts or percentages as facts
-- Include the company's actual plan names where found
 
 ${
   inputs.includeEmailOutro
@@ -157,7 +107,7 @@ ${
     : ""
 }
 
-After the flyer (and email if included), output ---SOURCES_JSON--- then a JSON array of source objects with fields: category, claim, source_name, description. Include the specific URLs found during research for web sources.`;
+After the flyer (and email if included), output ---SOURCES_JSON--- then a JSON array of source objects with fields: category, claim, source_name, description. Only include real, verifiable sources. Label any illustrative figures as such.`;
 }
 
 // ─── Sources page builder ─────────────────────────────────────────────────────
@@ -222,15 +172,15 @@ function buildSourcesHtml(companyName: string, sources: SourceEntry[]): string {
   <div class="header">
     <div class="header-tag">Transparency &amp; Accuracy</div>
     <h1>Sources &amp; References: <span>${companyName}</span></h1>
-    <div class="header-sub">Each claim in the retirement flyer is traced to its source below. Web-researched data is cited with URLs where available.</div>
+    <div class="header-sub">Each claim in the retirement flyer is traced to its source below. Illustrative figures are clearly labeled.</div>
   </div>
   <div class="body">
-    <div class="intro">Facts drawn directly from official company or government sources are cited as-is. Figures labeled "illustrative" in the flyer were not confirmed publicly and should be verified through official plan documents.</div>
+    <div class="intro">Facts are drawn from publicly available government guidance, company disclosures, or clearly labeled illustrative examples. Verify plan-specific figures through official employer benefit portals.</div>
     <div class="col-headers"><span>Claim in Flyer</span><span>Source</span></div>
     ${rows}
   </div>
   <div class="footer">
-    <strong>Note:</strong> This reference document is for transparency purposes only. Verify all plan-specific details through official employer benefit portals and qualified professionals. Not affiliated with or endorsed by ${companyName}.
+    <strong>Note:</strong> This reference document is for transparency purposes only. Not affiliated with or endorsed by ${companyName}. Consult official plan documents and qualified professionals for personalized advice.
   </div>
 </div>
 </body>
@@ -250,18 +200,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Research phase (company mode only)
-    let research = "";
-    if (inputs.mode === "company") {
-      research = await researchCompanyBenefits(inputs.companyName);
-    }
-
-    // Generation phase
     const message = await client.messages.create({
       model: "claude-opus-4-8",
       max_tokens: 6000,
       system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: buildFlyerPrompt(inputs, research) }],
+      messages: [{ role: "user", content: buildFlyerPrompt(inputs) }],
     });
 
     const content = message.content[0];
@@ -283,10 +226,8 @@ export async function POST(req: NextRequest) {
     let html = emailIdx !== -1 ? beforeSources.slice(0, emailIdx).trim() : beforeSources.trim();
     const emailOutro = emailIdx !== -1 ? beforeSources.slice(emailIdx + emailMarker.length).trim() : null;
 
-    // Strip accidental markdown fences
     html = html.replace(/^```html\n?/i, "").replace(/```$/, "").trim();
 
-    // Build sources page
     let sourcesHtml: string | null = null;
     if (sourcesRaw) {
       try {
@@ -301,7 +242,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ html, sourcesHtml, emailOutro, research });
+    return NextResponse.json({ html, sourcesHtml, emailOutro });
   } catch (err) {
     console.error("Generate error:", err);
     const msg = err instanceof Error ? err.message : String(err);
@@ -310,9 +251,6 @@ export async function POST(req: NextRequest) {
       : msg.includes("401") || msg.includes("authentication")
       ? "Invalid API key. Check ANTHROPIC_API_KEY in your .env.local file."
       : "Failed to generate flyer. Check your API key and try again.";
-    return NextResponse.json(
-      { error: friendlyError },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: friendlyError }, { status: 500 });
   }
 }
